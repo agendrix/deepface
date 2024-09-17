@@ -77,12 +77,8 @@ def verify(
         show_images([Image.open(img1_path), Image.open(img2_path)])
 
     start = time.perf_counter()
-    embeddings_1 = process_image(
-        img1_path, model=model, detector_backend=detector_backend, distance_metric=distance_metric
-    )
-    embeddings_2 = process_image(
-        img2_path, model=model, detector_backend=detector_backend, distance_metric=distance_metric
-    )
+    embeddings_1 = process_image(img1_path, model=model, detector_backend=detector_backend, distance_metric=distance_metric)
+    embeddings_2 = process_image(img2_path, model=model, detector_backend=detector_backend, distance_metric=distance_metric)
     faces_count = len(embeddings_2)
 
     result = DeepFace.verify(
@@ -127,11 +123,7 @@ def eval(
     prediction_results: dict[str, float] = {"TP": 0, "FP": 0, "TN": 0, "FN": 0, "avg_time": 0.0}
     total_time = 0.0
 
-    total_verifications = (
-        sum([len(person_images) for person_images in images])
-        * (sum([len(person_images) for person_images in images]) - 1)
-        // 2
-    )
+    total_verifications = sum([len(person_images) for person_images in images]) * (sum([len(person_images) for person_images in images]) - 1) // 2
 
     with tqdm.tqdm(
         total=total_verifications,
@@ -189,19 +181,11 @@ def eval(
         2,
     )
     results["f1"] = round(
-        2
-        * (results["precision"] * results["recall"])
-        / (results["precision"] + results["recall"] + epsilon),
+        2 * (results["precision"] * results["recall"]) / (results["precision"] + results["recall"] + epsilon),
         2,
     )
     results["avg_time"] = round(
-        total_time
-        / (
-            prediction_results["TP"]
-            + prediction_results["FP"]
-            + prediction_results["TN"]
-            + prediction_results["FN"]
-        ),
+        total_time / (prediction_results["TP"] + prediction_results["FP"] + prediction_results["TN"] + prediction_results["FN"]),
         2,
     )
     return results
@@ -210,31 +194,18 @@ def eval(
 if __name__ == "__main__":
     args = parse_args()
 
-    people_directories = [
-        f"{args.directory}/{person}"
-        for person in os.listdir(args.directory)
-        if os.path.isdir(f"{args.directory}/{person}")
-    ]
-    images = [
-        [f"{person_directory}/{img}" for img in os.listdir(person_directory)]
-        for person_directory in people_directories
-    ]
+    people_directories = [f"{args.directory}/{person}" for person in os.listdir(args.directory) if os.path.isdir(f"{args.directory}/{person}")]
+    images = [[f"{person_directory}/{img}" for img in os.listdir(person_directory)] for person_directory in people_directories]
 
-    eval_parameters = itertools.product(MODELS, DETECTOR_BACKENDS, DISTANCE_METRICS)
-    # Test each param combination
     print("=== Testing model configurations ===")
-    for model, detector_backend, distance_metric in eval_parameters:
+    for model, detector_backend, distance_metric in itertools.product(MODELS, DETECTOR_BACKENDS, DISTANCE_METRICS):
         eval([images[0][:2], images[1][:2]], model, detector_backend, distance_metric, silent=True)
 
     final_results: list[tuple[tuple[str, str, str], dict[str, float]]] = []
-    for model, detector_backend, distance_metric in eval_parameters:
+    for model, detector_backend, distance_metric in itertools.product(MODELS, DETECTOR_BACKENDS, DISTANCE_METRICS):
         results = eval(images, model, detector_backend, distance_metric)
         final_results.append(((model, detector_backend, distance_metric), results))
-
-        # print results on one line
-        print(
-            f"Precision: {results['precision']}, Recall: {results['recall']}, F1 Score: {results['f1']}, Avg Time: {results['avg_time']}s"
-        )
+        print(f"Precision: {results['precision']}, Recall: {results['recall']}, F1 Score: {results['f1']}, Avg Time: {results['avg_time']}s")
 
     print("=== Final Results ===")
     for (model, detector_backend, distance_metric), results in final_results:
