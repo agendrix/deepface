@@ -24,7 +24,7 @@ dependencies = [
     "tf-keras>=2.17.0",
     "dlib>=19.24.6",
     "mediapipe>=0.10.15",
-    "ultralytics>=8.2.94",
+    "ultralytics>=8.2.95",
 ]
 requires-python = "==3.12.*"
 readme = "README.md"

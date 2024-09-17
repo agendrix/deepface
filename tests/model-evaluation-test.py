@@ -221,6 +221,11 @@ if __name__ == "__main__":
     ]
 
     eval_parameters = itertools.product(MODELS, DETECTOR_BACKENDS, DISTANCE_METRICS)
+    # Test each param combination
+    print("=== Testing model configurations ===")
+    for model, detector_backend, distance_metric in eval_parameters:
+        eval([images[0][:2], images[1][:2]], model, detector_backend, distance_metric, silent=True)
+
     final_results: list[tuple[tuple[str, str, str], dict[str, float]]] = []
     for model, detector_backend, distance_metric in eval_parameters:
         results = eval(images, model, detector_backend, distance_metric)
@@ -240,22 +245,22 @@ if __name__ == "__main__":
         print(f"Avg Time: {results['avg_time']}s")
         print("")
 
-    print("=== Best Model ===")
-    best_model = max(final_results, key=lambda x: x[1]["f1"])
-    print(
-        f"Model: {best_model[0][0]}, Detector: {best_model[0][1]}, Distance Metric: {best_model[0][2]}"
-    )
-    print(f"Precision: {best_model[1]['precision']}")
-    print(f"Recall: {best_model[1]['recall']}")
-    print(f"F1 Score: {best_model[1]['f1']}")
-    print(f"Avg Time: {best_model[1]['avg_time']}s")
+    print("=== Top-3 Best Models ===")
+    best_models = sorted(final_results, key=lambda x: x[1]["f1"], reverse=True)[:3]
+    for (model, detector_backend, distance_metric), results in best_models:
+        print(f"Model: {model}, Detector: {detector_backend}, Distance Metric: {distance_metric}")
+        print(f"Precision: {results['precision']}")
+        print(f"Recall: {results['recall']}")
+        print(f"F1 Score: {results['f1']}")
+        print(f"Avg Time: {results['avg_time']}s")
+        print("")
 
-    print("=== Fastest Model ===")
-    fastest_model = min(final_results, key=lambda x: x[1]["avg_time"])
-    print(
-        f"Model: {fastest_model[0][0]}, Detector: {fastest_model[0][1]}, Distance Metric: {fastest_model[0][2]}"
-    )
-    print(f"Precision: {fastest_model[1]['precision']}")
-    print(f"Recall: {fastest_model[1]['recall']}")
-    print(f"F1 Score: {fastest_model[1]['f1']}")
-    print(f"Avg Time: {fastest_model[1]['avg_time']}s")
+    print("=== Top-3 Fastest Model ===")
+    fastest_models = sorted(final_results, key=lambda x: x[1]["avg_time"])[:3]
+    for (model, detector_backend, distance_metric), results in fastest_models:
+        print(f"Model: {model}, Detector: {detector_backend}, Distance Metric: {distance_metric}")
+        print(f"Precision: {results['precision']}")
+        print(f"Recall: {results['recall']}")
+        print(f"F1 Score: {results['f1']}")
+        print(f"Avg Time: {results['avg_time']}s")
+        print("")
