@@ -16,7 +16,9 @@
     "reportMissingTypeStubs": "none",
     "reportUnknownVariableType": "none",
     "reportUnknownMemberType": "none",
-    "reportPrivateUsage": "none"
+    "reportPrivateUsage": "none",
+    "reportUnknownParameterType": "none",
+    "reportUnknownArgumentType": "none",
   },
   "python.testing.pytestArgs": ["tests"],
   "python.testing.unittestEnabled": false,

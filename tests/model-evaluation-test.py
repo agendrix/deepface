@@ -53,7 +53,6 @@ def process_image(
     img_path: str,
     model: str = MODELS[0],
     detector_backend: str = DETECTOR_BACKENDS[2],
-    distance_metric: str = DISTANCE_METRICS[0],
 ) -> list[list[float]]:
     detect_result = DeepFace.represent(
         img_path,
@@ -77,8 +76,8 @@ def verify(
         show_images([Image.open(img1_path), Image.open(img2_path)])
 
     start = time.perf_counter()
-    embeddings_1 = process_image(img1_path, model=model, detector_backend=detector_backend, distance_metric=distance_metric)
-    embeddings_2 = process_image(img2_path, model=model, detector_backend=detector_backend, distance_metric=distance_metric)
+    embeddings_1 = process_image(img1_path, model=model, detector_backend=detector_backend)
+    embeddings_2 = process_image(img2_path, model=model, detector_backend=detector_backend)
     faces_count = len(embeddings_2)
 
     result = DeepFace.verify(
