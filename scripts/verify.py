@@ -1,4 +1,5 @@
 import argparse
+import json
 
 from deepface import DeepFace
 
@@ -53,7 +54,7 @@ def main():
         "faces_count": faces_count,
     }
 
-    print(output)
+    print(json.dumps(output))
 
 
 def process_image(
