@@ -1,8 +1,8 @@
 # common dependencies
+import logging
 import os
 import warnings
-import logging
-from typing import Any, Dict, List, Union, Optional
+from typing import Any, Dict, List, Optional, Union
 
 # this has to be set before importing tensorflow
 os.environ["TF_USE_LEGACY_KERAS"] = "1"
@@ -14,20 +14,21 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 
+from deepface import __version__
+
 # package dependencies
-from deepface.commons import package_utils, folder_utils
+from deepface.commons import folder_utils, package_utils
 from deepface.commons.logger import Logger
 from deepface.modules import (
-    modeling,
-    representation,
-    verification,
-    recognition,
     demography,
     detection,
-    streaming,
+    modeling,
     preprocessing,
+    recognition,
+    representation,
+    streaming,
+    verification,
 )
-from deepface import __version__
 
 logger = Logger()
 
@@ -68,8 +69,8 @@ def build_model(model_name: str, task: str = "facial_recognition") -> Any:
 
 
 def verify(
-    img1_path: Union[str, np.ndarray, List[float]],
-    img2_path: Union[str, np.ndarray, List[float]],
+    img1_path: Union[str, np.ndarray, List[float], List[List[float]]],
+    img2_path: Union[str, np.ndarray, List[float], List[List[float]]],
     model_name: str = "VGG-Face",
     detector_backend: str = "opencv",
     distance_metric: str = "cosine",
@@ -84,13 +85,13 @@ def verify(
     """
     Verify if an image pair represents the same person or different persons.
     Args:
-        img1_path (str or np.ndarray or List[float]): Path to the first image.
+        img1_path (str or np.ndarray or List[float] or List[List[float]]): Path to the first image.
             Accepts exact image path as a string, numpy array (BGR), base64 encoded images
-            or pre-calculated embeddings.
+            or pre-calculated embeddings for 1 or multiple faces.
 
-        img2_path (str or np.ndarray or List[float]): Path to the second image.
+        img2_path (str or np.ndarray or List[float] or List[List[float]]): Path to the second image.
             Accepts exact image path as a string, numpy array (BGR), base64 encoded images
-            or pre-calculated embeddings.
+            or pre-calculated embeddings for 1 or multiple faces.
 
         model_name (str): Model for face recognition. Options: VGG-Face, Facenet, Facenet512,
             OpenFace, DeepFace, DeepID, Dlib, ArcFace, SFace and GhostFaceNet (default is VGG-Face).

@@ -44,3 +44,6 @@ dev = [
 
 [tool.black]
 line-length = 140
+
+[tool.pyright]
+reportMissingTypeArgument = false

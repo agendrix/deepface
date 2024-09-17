@@ -1,21 +1,23 @@
 # built-in dependencies
 import time
-from typing import Any, Dict, Optional, Union, List, Tuple
+import typing
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 # 3rd party dependencies
 import numpy as np
 
-# project dependencies
-from deepface.modules import representation, detection, modeling
-from deepface.models.FacialRecognition import FacialRecognition
 from deepface.commons.logger import Logger
+from deepface.models.FacialRecognition import FacialRecognition
+
+# project dependencies
+from deepface.modules import detection, modeling, representation
 
 logger = Logger()
 
 
 def verify(
-    img1_path: Union[str, np.ndarray, List[float]],
-    img2_path: Union[str, np.ndarray, List[float]],
+    img1_path: Union[str, np.ndarray, List[float], List[List[float]]],
+    img2_path: Union[str, np.ndarray, List[float], List[List[float]]],
     model_name: str = "VGG-Face",
     detector_backend: str = "opencv",
     distance_metric: str = "cosine",
@@ -35,13 +37,13 @@ def verify(
     (or lower distance) than vectors of images of different persons.
 
     Args:
-        img1_path (str or np.ndarray or List[float]): Path to the first image.
+        img1_path (str or np.ndarray or List[float] or List[List[float]]): Path to the first image.
             Accepts exact image path as a string, numpy array (BGR), base64 encoded images
-            or pre-calculated embeddings.
+            or pre-calculated embeddings for 1 or multiple faces.
 
-        img2_path (str or np.ndarray or  or List[float]): Path to the second image.
+        img2_path (str or np.ndarray or  or List[float] or List[List[float]]): Path to the second image.
             Accepts exact image path as a string, numpy array (BGR), base64 encoded images
-            or pre-calculated embeddings.
+            or pre-calculated embeddings for 1 or multiple faces.
 
         model_name (str): Model for face recognition. Options: VGG-Face, Facenet, Facenet512,
             OpenFace, DeepFace, DeepID, Dlib, ArcFace, SFace and GhostFaceNet (default is VGG-Face).
@@ -115,7 +117,7 @@ def verify(
     }
 
     def extract_embeddings_and_facial_areas(
-        img_path: Union[str, np.ndarray, List[float]], index: int
+        img_path: Union[str, np.ndarray, List[float], List[List[float]]], index: int
     ) -> Tuple[List[List[float]], List[dict]]:
         """
         Extracts facial embeddings and corresponding facial areas from an
@@ -127,7 +129,7 @@ def verify(
         pre-calculated embeddings and validates them.
 
         Args:
-            img_path (Union[str, np.ndarray, List[float]]):
+            img_path (Union[str, np.ndarray, List[float], List[List[float]]]):
                 - A string representing the file path to an image,
                 - A NumPy array containing the image data,
                 - Or a list of pre-calculated embedding values (of type `float`).
@@ -140,28 +142,49 @@ def verify(
                 - A list of dictionaries where each dictionary contains facial area information.
         """
         if isinstance(img_path, list):
-            # given image is already pre-calculated embedding
-            if not all(isinstance(dim, float) for dim in img_path):
-                raise ValueError(
-                    f"When passing img{index}_path as a list,"
-                    " ensure that all its items are of type float."
-                )
+            if isinstance(img_path[0], list):
+                img_path = typing.cast(List[List], img_path)
 
-            if silent is False:
-                logger.warn(
-                    f"You passed {index}-th image as pre-calculated embeddings."
-                    "Please ensure that embeddings have been calculated"
-                    f" for the {model_name} model."
-                )
+                for embedding in img_path:
+                    # given image is already pre-calculated embedding
+                    if not all(isinstance(dim, float) for dim in embedding):
+                        raise ValueError(
+                            f"When passing img{index}_path as a list,"
+                            " ensure that all its items are of type float."
+                        )
 
-            if len(img_path) != dims:
-                raise ValueError(
-                    f"embeddings of {model_name} should have {dims} dimensions,"
-                    f" but {index}-th image has {len(img_path)} dimensions input"
-                )
+                    if len(embedding) != dims:
+                        raise ValueError(
+                            f"embeddings of {model_name} should have {dims} dimensions,"
+                            f" but {index}-th image has {len(img_path)} dimensions input"
+                        )
 
-            img_embeddings = [img_path]
-            img_facial_areas = [no_facial_area]
+                img_embeddings = img_path
+                img_facial_areas = [no_facial_area] * len(img_path)
+            else:
+                img_path = typing.cast(List[float], img_path)
+                # given image is already pre-calculated embedding
+                if not all(isinstance(dim, float) for dim in img_path):
+                    raise ValueError(
+                        f"When passing img{index}_path as a list,"
+                        " ensure that all its items are of type float."
+                    )
+
+                if silent is False:
+                    logger.warn(
+                        f"You passed {index}-th image as pre-calculated embeddings."
+                        "Please ensure that embeddings have been calculated"
+                        f" for the {model_name} model."
+                    )
+
+                if len(img_path) != dims:
+                    raise ValueError(
+                        f"embeddings of {model_name} should have {dims} dimensions,"
+                        f" but {index}-th image has {len(img_path)} dimensions input"
+                    )
+
+                img_embeddings = [img_path]
+                img_facial_areas = [no_facial_area]
         else:
             try:
                 img_embeddings, img_facial_areas = __extract_faces_and_embeddings(
