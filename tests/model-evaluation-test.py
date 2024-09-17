@@ -200,7 +200,9 @@ if __name__ == "__main__":
     print("=== Testing model configurations ===")
     for model, detector_backend, distance_metric in itertools.product(MODELS, DETECTOR_BACKENDS, DISTANCE_METRICS):
         eval([images[0][:2], images[1][:2]], model, detector_backend, distance_metric, silent=True)
+    print("=== Finished testing model configurations ===")
 
+    print("=== Evaluating models ===")
     final_results: list[tuple[tuple[str, str, str], dict[str, float]]] = []
     for model, detector_backend, distance_metric in itertools.product(MODELS, DETECTOR_BACKENDS, DISTANCE_METRICS):
         results = eval(images, model, detector_backend, distance_metric)
