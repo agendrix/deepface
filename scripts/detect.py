@@ -1,7 +1,7 @@
 import argparse
 import json
 
-from deepface.commons.agendrix.constants import DETECTOR_BACKENDS, MODELS
+from deepface.commons.agendrix.argparser import add_detector_backend_arg, add_model_arg
 from deepface.commons.agendrix.image_processing import get_faces_embeddings
 from deepface.commons.image_utils import load_image
 
@@ -9,8 +9,10 @@ from deepface.commons.image_utils import load_image
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("img_path", type=str, help="Path to the image")
-    parser.add_argument("--model", type=str, default="Facenet512", choices=MODELS, help="Face recognition model")
-    parser.add_argument("--detector_backend", type=str, default="mediapipe", choices=DETECTOR_BACKENDS, help="Face detector and alignment backend")
+
+    parser = add_model_arg(parser)
+    parser = add_detector_backend_arg(parser)
+
     return parser.parse_args()
 
 
