@@ -1,8 +1,12 @@
 import argparse
+import csv
 import itertools
+import logging
 import os
+import random
 import time
 import typing
+from typing import Any, Optional
 
 import matplotlib.pyplot as plt
 import PIL
@@ -38,7 +42,73 @@ DISTANCE_METRICS = ["cosine"]
 def parse_args():
     parser = argparse.ArgumentParser(description="Model evaluation test")
     parser.add_argument("directory", type=str, help="Directory containing images")
+    parser.add_argument("-o", "--output", type=str, default="output.csv", help="Output file to write results to")
+    parser.add_argument("--n", type=int, help="Number of people directories to include")
+    parser.add_argument("--log", type=str, default="INFO", choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], help="Logging level")
     return parser.parse_args()
+
+
+def main():
+    args = parse_args()
+    logging.basicConfig(level=args.log)
+
+    images = get_data(args.directory, args.n)
+
+    logging.info("=== Testing model configurations ===")
+    for model, detector_backend, distance_metric in itertools.product(MODELS, DETECTOR_BACKENDS, DISTANCE_METRICS):
+        eval([images[0][:2], images[1][:2]], model, detector_backend, distance_metric, silent=True)
+    logging.info("=== Finished testing model configurations ===")
+
+    logging.info("=== Evaluating models ===")
+    final_results: list[tuple[tuple[str, str, str], dict[str, float]]] = []
+    for model, detector_backend, distance_metric in itertools.product(MODELS, DETECTOR_BACKENDS, DISTANCE_METRICS):
+        results = eval(images, model, detector_backend, distance_metric)
+        final_results.append(((model, detector_backend, distance_metric), results))
+        logging.info(f"Precision: {results['precision']}, Recall: {results['recall']}, F1 Score: {results['f1']}, Avg Time: {results['avg_time']}s")
+
+    # Write results to CSV
+    with open(args.output, "w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(["Model", "Detector", "Distance Metric", "Precision", "Recall", "F1 Score", "Avg Time"])
+        for (model, detector_backend, distance_metric), results in final_results:
+            writer.writerow([model, detector_backend, distance_metric, results["precision"], results["recall"], results["f1"], results["avg_time"]])
+
+    logging.info("=== Final Results ===")
+    for (model, detector_backend, distance_metric), results in final_results:
+        logging.info(f"Model: {model}, Detector: {detector_backend}, Distance Metric: {distance_metric}")
+        logging.info(f"Precision: {results['precision']}")
+        logging.info(f"Recall: {results['recall']}")
+        logging.info(f"F1 Score: {results['f1']}")
+        logging.info(f"Avg Time: {results['avg_time']}s")
+        logging.info("")
+
+    logging.info("=== Top-3 Best Models ===")
+    best_models = sorted(final_results, key=lambda x: x[1]["f1"], reverse=True)[:3]
+    for (model, detector_backend, distance_metric), results in best_models:
+        logging.info(f"Model: {model}, Detector: {detector_backend}, Distance Metric: {distance_metric}")
+        logging.info(f"Precision: {results['precision']}")
+        logging.info(f"Recall: {results['recall']}")
+        logging.info(f"F1 Score: {results['f1']}")
+        logging.info(f"Avg Time: {results['avg_time']}s")
+        logging.info("")
+
+    logging.info("=== Top-3 Fastest Model ===")
+    fastest_models = sorted(final_results, key=lambda x: x[1]["avg_time"])[:3]
+    for (model, detector_backend, distance_metric), results in fastest_models:
+        logging.info(f"Model: {model}, Detector: {detector_backend}, Distance Metric: {distance_metric}")
+        logging.info(f"Precision: {results['precision']}")
+        logging.info(f"Recall: {results['recall']}")
+        logging.info(f"F1 Score: {results['f1']}")
+        logging.info(f"Avg Time: {results['avg_time']}s")
+        logging.info("")
+
+
+def get_data(directory: str, n_dirs: Optional[int]) -> list[list[str]]:
+    subdirs = [f"{directory}/{person}" for person in os.listdir(directory) if os.path.isdir(f"{directory}/{person}")]
+    random.shuffle(subdirs)
+    if n_dirs is not None:
+        subdirs = subdirs[:n_dirs]
+    return [[f"{subdir}/{img}" for img in os.listdir(subdir)] for subdir in subdirs]
 
 
 def show_images(images: list[PIL.ImageFile.ImageFile]):
@@ -95,14 +165,14 @@ def verify(
     duration = end - start
 
     if silent == False:
-        print(f"Matches: {result['verified']}")
-        print(f"Faces count: {faces_count}")
-        print(f"Model: {result['model']}")
-        print(f"Detector: {result['detector_backend']}")
-        print(f"Distance metric: {result['similarity_metric']}")
-        print(f"Distance: {result['distance']}")
-        print(f"Threshold: {result['threshold']}")
-        print(f"Time: {duration}")
+        logging.debug(f"Matches: {result['verified']}")
+        logging.debug(f"Faces count: {faces_count}")
+        logging.debug(f"Model: {result['model']}")
+        logging.debug(f"Detector: {result['detector_backend']}")
+        logging.debug(f"Distance metric: {result['similarity_metric']}")
+        logging.debug(f"Distance: {result['distance']}")
+        logging.debug(f"Threshold: {result['threshold']}")
+        logging.debug(f"Time: {duration}")
 
     return {
         "matches": result["verified"],
@@ -124,7 +194,7 @@ def eval(
 
     total_verifications = sum([len(person_images) for person_images in images]) * (sum([len(person_images) for person_images in images]) - 1) // 2
 
-    with tqdm.tqdm(
+    with TqdmLoggingContextManager(
         total=total_verifications,
         desc=f"Model: {model}, Detector: {detector_backend}, Distance Metric: {distance_metric}",
     ) as pbar:
@@ -190,49 +260,34 @@ def eval(
     return results
 
 
+class TqdmLoggingContextManager:
+    def __init__(self, total: int, desc: str, **kwargs: Any):
+        self.total = total
+        self.desc = desc
+        self.kwargs = kwargs
+
+    def __enter__(self):
+        if logging.getLogger().getEffectiveLevel() < logging.INFO:
+            self.progressbar = tqdm.tqdm(total=self.total, desc=self.desc, **self.kwargs)
+        else:
+            self.progressbar = TqdmDummy()
+
+        return self.progressbar
+
+    def __exit__(self, exc_type: Any, exc_value: Any, exc_tb: Any):
+        self.progressbar.close()
+
+
+class TqdmDummy:
+    def __init__(self):
+        pass
+
+    def update(self, n: int):
+        pass
+
+    def close(self):
+        pass
+
+
 if __name__ == "__main__":
-    args = parse_args()
-
-    people_directories = [f"{args.directory}/{person}" for person in os.listdir(args.directory) if os.path.isdir(f"{args.directory}/{person}")]
-    images = [[f"{person_directory}/{img}" for img in os.listdir(person_directory)] for person_directory in people_directories]
-
-    print("=== Testing model configurations ===")
-    for model, detector_backend, distance_metric in itertools.product(MODELS, DETECTOR_BACKENDS, DISTANCE_METRICS):
-        eval([images[0][:2], images[1][:2]], model, detector_backend, distance_metric, silent=True)
-    print("=== Finished testing model configurations ===")
-
-    print("=== Evaluating models ===")
-    final_results: list[tuple[tuple[str, str, str], dict[str, float]]] = []
-    for model, detector_backend, distance_metric in itertools.product(MODELS, DETECTOR_BACKENDS, DISTANCE_METRICS):
-        results = eval(images, model, detector_backend, distance_metric)
-        final_results.append(((model, detector_backend, distance_metric), results))
-        print(f"Precision: {results['precision']}, Recall: {results['recall']}, F1 Score: {results['f1']}, Avg Time: {results['avg_time']}s")
-
-    print("=== Final Results ===")
-    for (model, detector_backend, distance_metric), results in final_results:
-        print(f"Model: {model}, Detector: {detector_backend}, Distance Metric: {distance_metric}")
-        print(f"Precision: {results['precision']}")
-        print(f"Recall: {results['recall']}")
-        print(f"F1 Score: {results['f1']}")
-        print(f"Avg Time: {results['avg_time']}s")
-        print("")
-
-    print("=== Top-3 Best Models ===")
-    best_models = sorted(final_results, key=lambda x: x[1]["f1"], reverse=True)[:3]
-    for (model, detector_backend, distance_metric), results in best_models:
-        print(f"Model: {model}, Detector: {detector_backend}, Distance Metric: {distance_metric}")
-        print(f"Precision: {results['precision']}")
-        print(f"Recall: {results['recall']}")
-        print(f"F1 Score: {results['f1']}")
-        print(f"Avg Time: {results['avg_time']}s")
-        print("")
-
-    print("=== Top-3 Fastest Model ===")
-    fastest_models = sorted(final_results, key=lambda x: x[1]["avg_time"])[:3]
-    for (model, detector_backend, distance_metric), results in fastest_models:
-        print(f"Model: {model}, Detector: {detector_backend}, Distance Metric: {distance_metric}")
-        print(f"Precision: {results['precision']}")
-        print(f"Recall: {results['recall']}")
-        print(f"F1 Score: {results['f1']}")
-        print(f"Avg Time: {results['avg_time']}s")
-        print("")
+    main()
