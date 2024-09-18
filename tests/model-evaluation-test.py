@@ -16,6 +16,7 @@ import tqdm
 from PIL import Image
 
 from deepface import DeepFace
+from deepface.commons.agendrix.argparser import add_log_level_arg
 from deepface.commons.agendrix.constants import DETECTOR_BACKENDS, DISTANCE_METRICS, MODELS
 from deepface.commons.agendrix.image_processing import get_faces_embeddings
 from deepface.commons.image_utils import load_image
@@ -26,8 +27,8 @@ def parse_args():
     parser.add_argument("directory", type=str, help="Directory containing images")
     parser.add_argument("-o", "--output", type=str, default="output.csv", help="Output file to write results to")
     parser.add_argument("--n-samples", type=int, help="Number of people directories to include")
-    parser.add_argument("--log", type=str, default="INFO", choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], help="Logging level")
     parser.add_argument("--config", type=str, action="append", help="Series of configurations to test, e.g --config VGG-Face,opencv --config Facenet512,mediapipe")
+    parser = add_log_level_arg(parser)
 
     return parser.parse_args()
 

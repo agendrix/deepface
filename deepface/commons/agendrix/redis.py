@@ -1,10 +1,7 @@
-from os import environ
+import os
 
-import redis
+from redis import Redis
 
 
 def initialize_redis():
-    return redis.Redis(
-        host=environ.get("REDIS_HOST", "localhost"),
-        port=int(environ.get("REDIS_PORT", 0)),
-    )
+    return Redis.from_url(os.getenv("REDIS_URL"))

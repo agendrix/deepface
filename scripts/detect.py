@@ -2,7 +2,9 @@ import argparse
 import json
 import logging
 
-from deepface.commons.agendrix.argparser import add_detector_backend_arg, add_model_arg, add_redis_key_arg
+from dotenv import load_dotenv
+
+from deepface.commons.agendrix.argparser import add_detector_backend_arg, add_log_level_arg, add_model_arg, add_redis_key_arg
 from deepface.commons.agendrix.image_processing import get_faces_embeddings
 from deepface.commons.agendrix.redis import initialize_redis
 from deepface.commons.image_utils import load_image
@@ -14,14 +16,20 @@ def parse_args():
 
     parser = add_model_arg(parser)
     parser = add_detector_backend_arg(parser)
+
     parser = add_redis_key_arg(parser)
+
+    parser = add_log_level_arg(parser)
 
     return parser.parse_args()
 
 
 def main():
+    # Load dotenv
+    load_dotenv()
+
     args = parse_args()
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=args.log)
 
     img, _ = load_image(args.img_path)
     embeddings = get_faces_embeddings(img, args.model, args.detector_backend)

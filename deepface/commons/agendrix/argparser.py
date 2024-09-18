@@ -1,5 +1,6 @@
 from argparse import ArgumentParser
 
+
 from deepface.commons.agendrix.constants import DETECTOR_BACKENDS, DISTANCE_METRICS, MODELS
 
 
@@ -25,4 +26,9 @@ def add_threshold_arg(parser: ArgumentParser) -> ArgumentParser:
 
 def add_redis_key_arg(parser: ArgumentParser) -> ArgumentParser:
     parser.add_argument("--redis_key", type=str, help="Key to use to store results in Redis")
+    return parser
+
+
+def add_log_level_arg(parser: ArgumentParser) -> ArgumentParser:
+    parser.add_argument("--log", type=str, default="INFO", choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], help="Logging level")
     return parser
