@@ -18,6 +18,11 @@ def add_distance_metric_arg(parser: ArgumentParser) -> ArgumentParser:
     return parser
 
 
+def add_threshold_arg(parser: ArgumentParser) -> ArgumentParser:
+    parser.add_argument("--threshold", type=float, help="Model threshold to use when matching faces")
+    return parser
+
+
 def add_redis_key_arg(parser: ArgumentParser) -> ArgumentParser:
     parser.add_argument("--redis_key", type=str, help="Key to use to store results in Redis")
     return parser

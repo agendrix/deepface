@@ -3,7 +3,7 @@ import json
 import logging
 
 from deepface import DeepFace
-from deepface.commons.agendrix.argparser import add_detector_backend_arg, add_distance_metric_arg, add_model_arg, add_redis_key_arg
+from deepface.commons.agendrix.argparser import add_detector_backend_arg, add_distance_metric_arg, add_model_arg, add_redis_key_arg, add_threshold_arg
 from deepface.commons.agendrix.image_processing import get_faces_embeddings
 from deepface.commons.agendrix.redis import initialize_redis
 from deepface.commons.image_utils import load_image
@@ -17,6 +17,7 @@ def parse_args():
     parser = add_model_arg(parser)
     parser = add_detector_backend_arg(parser)
     parser = add_distance_metric_arg(parser)
+    parser = add_threshold_arg(parser)
 
     parser = add_redis_key_arg(parser)
 
@@ -42,7 +43,7 @@ def main():
         distance_metric=args.distance_metric,
         enforce_detection=False,
         silent=True,
-        threshold=None,
+        threshold=args.thresold,
         anti_spoofing=False,
     )
 
