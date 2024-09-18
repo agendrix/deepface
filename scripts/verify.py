@@ -1,9 +1,11 @@
 import argparse
 import json
+import logging
 
 from deepface import DeepFace
-from deepface.commons.agendrix.argparser import add_detector_backend_arg, add_distance_metric_arg, add_model_arg
+from deepface.commons.agendrix.argparser import add_detector_backend_arg, add_distance_metric_arg, add_model_arg, add_redis_key_arg
 from deepface.commons.agendrix.image_processing import get_faces_embeddings
+from deepface.commons.agendrix.redis import initialize_redis
 from deepface.commons.image_utils import load_image
 
 
@@ -16,11 +18,15 @@ def parse_args():
     parser = add_detector_backend_arg(parser)
     parser = add_distance_metric_arg(parser)
 
+    parser = add_redis_key_arg(parser)
+
     return parser.parse_args()
 
 
 def main():
     args = parse_args()
+    logging.basicConfig(level=logging.INFO)
+
     img1, _ = load_image(args.img1_path)
     img2, _ = load_image(args.img2_path)
 
@@ -46,7 +52,11 @@ def main():
         "faces_count": faces_count,
     }
 
-    print(json.dumps(output))
+    logging.info(json.dumps(output))
+
+    if args.redis_key is not None:
+        r = initialize_redis()
+        r.set(args.redis_key, json.dumps(output))
 
 
 if __name__ == "__main__":

@@ -25,6 +25,7 @@ dependencies = [
     "dlib>=19.24.6",
     "mediapipe>=0.10.15",
     "ultralytics>=8.2.95",
+    "redis>=5.0.8",
 ]
 requires-python = "==3.12.*"
 readme = "README.md"
