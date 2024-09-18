@@ -25,8 +25,10 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Model evaluation test")
     parser.add_argument("directory", type=str, help="Directory containing images")
     parser.add_argument("-o", "--output", type=str, default="output.csv", help="Output file to write results to")
-    parser.add_argument("--n", type=int, help="Number of people directories to include")
+    parser.add_argument("--n-samples", type=int, help="Number of people directories to include")
     parser.add_argument("--log", type=str, default="INFO", choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], help="Logging level")
+    parser.add_argument("--config", type=str, action="append", help="Series of configurations to test, e.g --config VGG-Face,opencv --config Facenet512,mediapipe")
+
     return parser.parse_args()
 
 
@@ -34,16 +36,24 @@ def main():
     args = parse_args()
     logging.basicConfig(level=args.log)
 
-    images = get_data(args.directory, args.n)
+    if args.config is not None:
+        configs = [(*c.split(","), DISTANCE_METRICS[0]) for c in args.config]
+    else:
+        configs = list(itertools.product(MODELS, DETECTOR_BACKENDS, DISTANCE_METRICS))
+
+    images = get_data(args.directory, args.n_samples)
+    with open(f"data.{args.output}", "w") as f:
+        for person_images in images:
+            f.write("\n".join(person_images) + "\n")
 
     logging.info("=== Testing model configurations ===")
-    for model, detector_backend, distance_metric in itertools.product(MODELS, DETECTOR_BACKENDS, DISTANCE_METRICS):
+    for model, detector_backend, distance_metric in configs:
         eval([images[0][:2], images[1][:2]], model, detector_backend, distance_metric, silent=True)
     logging.info("=== Finished testing model configurations ===")
 
     logging.info("=== Evaluating models ===")
     final_results: list[tuple[tuple[str, str, str], dict[str, float]]] = []
-    for model, detector_backend, distance_metric in itertools.product(MODELS, DETECTOR_BACKENDS, DISTANCE_METRICS):
+    for model, detector_backend, distance_metric in configs:
         results = eval(images, model, detector_backend, distance_metric)
         final_results.append(((model, detector_backend, distance_metric), results))
         logging.info(f"Precision: {results['precision']}, Recall: {results['recall']}, F1 Score: {results['f1']}, Avg Time: {results['avg_time']}s")
@@ -134,15 +144,14 @@ def verify(
     end = time.perf_counter()
     duration = end - start
 
-    if silent == False:
-        logging.debug(f"Matches: {result['verified']}")
-        logging.debug(f"Faces count: {faces_count}")
-        logging.debug(f"Model: {result['model']}")
-        logging.debug(f"Detector: {result['detector_backend']}")
-        logging.debug(f"Distance metric: {result['similarity_metric']}")
-        logging.debug(f"Distance: {result['distance']}")
-        logging.debug(f"Threshold: {result['threshold']}")
-        logging.debug(f"Time: {duration}")
+    logging.debug(f"Matches: {result['verified']}")
+    logging.debug(f"Faces count: {faces_count}")
+    logging.debug(f"Model: {result['model']}")
+    logging.debug(f"Detector: {result['detector_backend']}")
+    logging.debug(f"Distance metric: {result['similarity_metric']}")
+    logging.debug(f"Distance: {result['distance']}")
+    logging.debug(f"Threshold: {result['threshold']}")
+    logging.debug(f"Time: {duration}")
 
     return {
         "matches": result["verified"],
