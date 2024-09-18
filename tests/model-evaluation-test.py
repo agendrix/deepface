@@ -267,7 +267,7 @@ class TqdmLoggingContextManager:
         self.kwargs = kwargs
 
     def __enter__(self):
-        if logging.getLogger().getEffectiveLevel() < logging.INFO:
+        if logging.getLogger().getEffectiveLevel() <= logging.INFO:
             self.progressbar = tqdm.tqdm(total=self.total, desc=self.desc, **self.kwargs)
         else:
             self.progressbar = TqdmDummy()
