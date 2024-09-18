@@ -1,23 +1,9 @@
 import argparse
 import json
 
-from deepface import DeepFace
-
-# MODELS = ['VGG-Face', 'Facenet', 'Facenet512', 'OpenFace', 'DeepFace', 'DeepID', 'Dlib', 'ArcFace', 'SFace', 'GhostFaceNet']
-MODELS = ["VGG-Face", "Facenet", "Facenet512", "OpenFace"]
-# DETECTOR_BACKENDS = ['opencv', 'retinaface', 'mtcnn', 'ssd', 'dlib', 'mediapipe', 'yolov8', 'centerface', 'skip']
-DETECTOR_BACKENDS = [
-    "opencv",
-    "retinaface",
-    "mtcnn",
-    "ssd",
-    "dlib",
-    "mediapipe",
-    "yolov8",
-    "centerface",
-]
-# DISTANCE_METRICS = ['cosine', 'euclidean', 'euclidean_l2']
-DISTANCE_METRICS = ["cosine"]
+from deepface.commons.agendrix.constants import DETECTOR_BACKENDS, MODELS
+from deepface.commons.agendrix.image_processing import get_faces_embeddings
+from deepface.commons.image_utils import load_image
 
 
 def parse_args():
@@ -30,7 +16,8 @@ def parse_args():
 
 def main():
     args = parse_args()
-    embeddings = process_image(args.img_path, args.model, args.detector_backend)
+    img, _ = load_image(args.img_path)
+    embeddings = get_faces_embeddings(img, args.model, args.detector_backend)
     faces_count = len(embeddings)
 
     output = {
@@ -38,21 +25,6 @@ def main():
     }
 
     print(json.dumps(output))
-
-
-def process_image(
-    img_path: str,
-    model: str = MODELS[0],
-    detector_backend: str = DETECTOR_BACKENDS[2],
-) -> list[list[float]]:
-    detect_result = DeepFace.represent(
-        img_path,
-        model_name=model,
-        detector_backend=detector_backend,
-        enforce_detection=False,
-        max_faces=3,
-    )
-    return [result["embedding"] for result in detect_result]
 
 
 if __name__ == "__main__":
