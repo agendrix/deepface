@@ -24,8 +24,8 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("img1_path", type=str, help="Path to the first image")
     parser.add_argument("img2_path", type=str, help="Path to the second image")
-    parser.add_argument("--model", type=str, default="VGG-Face", choices=MODELS, help="Face recognition model")
-    parser.add_argument("--detector_backend", type=str, default="opencv", choices=DETECTOR_BACKENDS, help="Face detector and alignment backend")
+    parser.add_argument("--model", type=str, default="Facenet512", choices=MODELS, help="Face recognition model")
+    parser.add_argument("--detector_backend", type=str, default="mediapipe", choices=DETECTOR_BACKENDS, help="Face detector and alignment backend")
     parser.add_argument("--distance_metric", type=str, default="cosine", choices=DISTANCE_METRICS, help="Type of distance metric to use")
     return parser.parse_args()
 

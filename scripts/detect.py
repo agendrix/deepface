@@ -23,8 +23,8 @@ DISTANCE_METRICS = ["cosine"]
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("img_path", type=str, help="Path to the image")
-    parser.add_argument("--model", type=str, default="VGG-Face", choices=MODELS, help="Face recognition model")
-    parser.add_argument("--detector_backend", type=str, default="opencv", choices=DETECTOR_BACKENDS, help="Face detector and alignment backend")
+    parser.add_argument("--model", type=str, default="Facenet512", choices=MODELS, help="Face recognition model")
+    parser.add_argument("--detector_backend", type=str, default="mediapipe", choices=DETECTOR_BACKENDS, help="Face detector and alignment backend")
     return parser.parse_args()
 
 
