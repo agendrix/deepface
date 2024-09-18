@@ -68,30 +68,7 @@ def main():
     logging.info("=== Final Results ===")
     for (model, detector_backend, distance_metric), results in final_results:
         logging.info(f"Model: {model}, Detector: {detector_backend}, Distance Metric: {distance_metric}")
-        logging.info(f"Precision: {results['precision']}")
-        logging.info(f"Recall: {results['recall']}")
-        logging.info(f"F1 Score: {results['f1']}")
-        logging.info(f"Avg Time: {results['avg_time']}s")
-        logging.info("")
-
-    logging.info("=== Top-3 Best Models ===")
-    best_models = sorted(final_results, key=lambda x: x[1]["f1"], reverse=True)[:3]
-    for (model, detector_backend, distance_metric), results in best_models:
-        logging.info(f"Model: {model}, Detector: {detector_backend}, Distance Metric: {distance_metric}")
-        logging.info(f"Precision: {results['precision']}")
-        logging.info(f"Recall: {results['recall']}")
-        logging.info(f"F1 Score: {results['f1']}")
-        logging.info(f"Avg Time: {results['avg_time']}s")
-        logging.info("")
-
-    logging.info("=== Top-3 Fastest Model ===")
-    fastest_models = sorted(final_results, key=lambda x: x[1]["avg_time"])[:3]
-    for (model, detector_backend, distance_metric), results in fastest_models:
-        logging.info(f"Model: {model}, Detector: {detector_backend}, Distance Metric: {distance_metric}")
-        logging.info(f"Precision: {results['precision']}")
-        logging.info(f"Recall: {results['recall']}")
-        logging.info(f"F1 Score: {results['f1']}")
-        logging.info(f"Avg Time: {results['avg_time']}s")
+        logging.info(f"Precision: {results['precision']}, Recall: {results['recall']}, F1 Score: {results['f1']}, Avg Time: {results['avg_time']}s")
         logging.info("")
 
 
