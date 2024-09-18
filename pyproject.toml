@@ -44,3 +44,7 @@ dev = [
 
 [tool.black]
 line-length = 180
+
+[tool.pdm.scripts]
+detect = "scripts/detect.py"
+verify = "scripts/verify.py"
