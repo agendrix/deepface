@@ -25,7 +25,6 @@ def parse_args():
 
 
 def main():
-    # Load dotenv
     load_dotenv()
 
     args = parse_args()
