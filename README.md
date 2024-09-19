@@ -56,3 +56,9 @@ options:
 ## Notes
 
 - Images can be passed as paths, URLs, or base60 strings.
+
+# Building the package for release
+
+```
+pdm build
+```

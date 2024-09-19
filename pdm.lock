@@ -397,7 +397,7 @@ version = "0.1.0"
 requires_python = "==3.12.*"
 editable = true
 path = "./."
-summary = "Default template for PDM package"
+summary = "Face recognition library for Python, customized for Agendrix usage"
 groups = ["dev"]
 dependencies = [
     "Flask>=1.1.2",
@@ -413,6 +413,7 @@ dependencies = [
     "numpy>=1.14.0",
     "opencv-python>=4.5.5.64",
     "pandas>=0.23.4",
+    "python-dotenv>=1.0.1",
     "redis>=5.0.8",
     "requests>=2.27.1",
     "retina-face>=0.0.1",
@@ -2150,7 +2151,7 @@ name = "python-dotenv"
 version = "1.0.1"
 requires_python = ">=3.8"
 summary = "Read key-value pairs from a .env file and set them as environment variables"
-groups = ["default"]
+groups = ["default", "dev"]
 files = [
     {file = "python-dotenv-1.0.1.tar.gz", hash = "sha256:e324ee90a023d808f1959c46bcbc04446a10ced277783dc6ee09987c37ec10ca"},
     {file = "python_dotenv-1.0.1-py3-none-any.whl", hash = "sha256:f7b63ef50f1b690dddf550d03497b66d609393b40b564ed0d674909a68ebf16a"},
