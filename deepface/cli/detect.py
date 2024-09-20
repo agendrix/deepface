@@ -42,7 +42,7 @@ def main():
 
     if args.redis_key is not None:
         r = initialize_redis()
-        r.set(args.redis_key, json.dumps(output))
+        r.setex(args.redis_key, 12 * 60 * 60, json.dumps(output))  # 12h expiration
 
 
 if __name__ == "__main__":
