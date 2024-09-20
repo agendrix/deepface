@@ -1,6 +1,7 @@
 import argparse
 import json
 import logging
+import os
 
 from dotenv import load_dotenv
 
@@ -25,7 +26,8 @@ def parse_args():
 
 
 def main():
-    load_dotenv()
+    if os.getenv("RAILS_ENV", "development") == "development":
+        load_dotenv()
 
     args = parse_args()
     logging.basicConfig(level=args.log)
