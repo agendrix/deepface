@@ -1,6 +1,5 @@
 from argparse import ArgumentParser
 
-
 from deepface.commons.agendrix.constants import DETECTOR_BACKENDS, DISTANCE_METRICS, MODELS
 
 
@@ -10,7 +9,7 @@ def add_model_arg(parser: ArgumentParser) -> ArgumentParser:
 
 
 def add_detector_backend_arg(parser: ArgumentParser) -> ArgumentParser:
-    parser.add_argument("--detector_backend", type=str, default="mediapipe", choices=DETECTOR_BACKENDS, help="Face detector and alignment backend")
+    parser.add_argument("--detector_backend", type=str, default="ssd", choices=DETECTOR_BACKENDS, help="Face detector and alignment backend")
     return parser
 
 
