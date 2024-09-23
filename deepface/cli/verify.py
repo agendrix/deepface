@@ -3,8 +3,6 @@ import json
 import logging
 import os
 
-from dotenv import load_dotenv
-
 from deepface import DeepFace
 from deepface.commons.agendrix.argparser import add_detector_backend_arg, add_distance_metric_arg, add_log_level_arg, add_model_arg, add_redis_key_arg, add_threshold_arg
 from deepface.commons.agendrix.image_processing import get_faces_embeddings
@@ -31,6 +29,8 @@ def parse_args():
 
 def main():
     if os.getenv("RAILS_ENV", "development") == "development":
+        from dotenv import load_dotenv
+
         load_dotenv()
 
     args = parse_args()
