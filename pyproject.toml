@@ -57,6 +57,7 @@ line-length = 180
 [tool.pdm.scripts]
 detect = "deepface/cli/detect.py"
 verify = "deepface/cli/verify.py"
+benchmark = "tests/benchmark_models.py"
 
 [tool.isort]
 multi_line_output = 3

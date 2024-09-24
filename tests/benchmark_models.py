@@ -74,11 +74,29 @@ def main():
 
 
 def get_data(directory: str, n_dirs: Optional[int]) -> list[list[str]]:
-    subdirs = [f"{directory}/{person}" for person in os.listdir(directory) if os.path.isdir(f"{directory}/{person}")]
+    subdirs = get_subdirs_with_images(directory)
+    print(subdirs)
+    if len(subdirs) < 2:
+        raise ValueError("At least 2 people directories with 2 or more images are required")
+
     random.shuffle(subdirs)
     if n_dirs is not None:
         subdirs = subdirs[:n_dirs]
+
+    print("Images: ", [[f"{subdir}/{img}" for img in os.listdir(subdir)] for subdir in subdirs])
     return [[f"{subdir}/{img}" for img in os.listdir(subdir)] for subdir in subdirs]
+
+
+def get_subdirs_with_images(directory: str) -> list[str]:
+    subdirs = []
+    # Get all subdirectories with at least 2 images
+    for name in [dir for dir in os.listdir(directory) if os.path.isdir(f"{directory}/{dir}")]:
+        # Get number of files (not folders) in the directory
+        person_dir = f"{directory}/{name}"
+        n_files = len([f for f in os.listdir(person_dir) if os.path.isfile(f"{person_dir}/{f}") and f != ".DS_Store"])
+        if n_files >= 2:
+            subdirs.append(f"{directory}/{name}")
+    return subdirs
 
 
 def show_images(images: list[PIL.ImageFile.ImageFile]):
