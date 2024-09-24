@@ -1,0 +1,67 @@
+[project]
+name = "deepface-agendrix"
+version = "0.1.1"
+description = "Face recognition library for Python, customized for Agendrix usage"
+authors = [
+    {name = "Philippe Poulin", email = "p.poulin@agendrix.com"},
+]
+dependencies = [
+    "requests>=2.27.1",
+    "numpy>=1.14.0",
+    "pandas>=0.23.4",
+    "gdown>=3.10.1",
+    "tqdm>=4.66.5",
+    "Pillow>=5.2.0",
+    "opencv-python>=4.5.5.64",
+    "tensorflow>=1.9.0",
+    "keras>=2.2.0",
+    "Flask>=1.1.2",
+    "flask-cors>=4.0.1",
+    "mtcnn>=0.1.0",
+    "retina-face>=0.0.1",
+    "fire>=0.4.0",
+    "gunicorn>=20.1.0",
+    "tf-keras>=2.17.0",
+    "dlib>=19.24.6",
+    "mediapipe>=0.10.15",
+    "ultralytics>=8.2.95",
+    "redis>=5.0.8",
+    "python-dotenv>=1.0.1",
+]
+requires-python = "==3.12.*"
+readme = "README.md"
+license = {text = "MIT"}
+
+[project.scripts]
+detect = "deepface.cli.detect:main"
+verify = "deepface.cli.verify:main"
+
+[tool.pdm]
+distribution = true
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[tool.pdm.dev-dependencies]
+dev = [
+    "-e file:///${PROJECT_ROOT}/#egg=deepface",
+    "ipython>=8.27.0",
+    "jupyter>=1.1.1",
+    "matplotlib>=3.9.2",
+]
+
+[tool.black]
+line-length = 180
+
+[tool.pdm.scripts]
+detect = "deepface/cli/detect.py"
+verify = "deepface/cli/verify.py"
+benchmark = "tests/benchmark_models.py"
+
+[tool.isort]
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+line_length = 180
+profile = "black"
