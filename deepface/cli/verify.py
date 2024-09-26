@@ -51,7 +51,7 @@ def main():
         distance_metric=args.distance_metric,
         enforce_detection=False,
         silent=True,
-        threshold=args.thresold,
+        threshold=args.threshold,
         anti_spoofing=False,
     )
 
