@@ -1,20 +1,20 @@
 from argparse import ArgumentParser
 
-from deepface.commons.agendrix.constants import DETECTOR_BACKENDS, DISTANCE_METRICS, MODELS
+from deepface.commons.agendrix.constants import DEFAULT_DETECTOR_BACKEND, DEFAULT_DISTANCE_METRIC, DEFAULT_MODEL, DETECTOR_BACKENDS, DISTANCE_METRICS, MODELS
 
 
 def add_model_arg(parser: ArgumentParser) -> ArgumentParser:
-    parser.add_argument("--model", type=str, default="Facenet512", choices=MODELS, help="Face recognition model")
+    parser.add_argument("--model", type=str, default=DEFAULT_MODEL, choices=MODELS, help="Face recognition model")
     return parser
 
 
 def add_detector_backend_arg(parser: ArgumentParser) -> ArgumentParser:
-    parser.add_argument("--detector_backend", type=str, default="ssd", choices=DETECTOR_BACKENDS, help="Face detector and alignment backend")
+    parser.add_argument("--detector_backend", type=str, default=DEFAULT_DETECTOR_BACKEND, choices=DETECTOR_BACKENDS, help="Face detector and alignment backend")
     return parser
 
 
 def add_distance_metric_arg(parser: ArgumentParser) -> ArgumentParser:
-    parser.add_argument("--distance_metric", type=str, default="cosine", choices=DISTANCE_METRICS, help="Type of distance metric to use")
+    parser.add_argument("--distance_metric", type=str, default=DEFAULT_DISTANCE_METRIC, choices=DISTANCE_METRICS, help="Type of distance metric to use")
     return parser
 
 
