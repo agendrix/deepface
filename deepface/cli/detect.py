@@ -36,15 +36,13 @@ def main():
     embeddings = get_faces_embeddings(img, args.model, args.detector_backend)
     faces_count = len(embeddings)
 
-    output = {
-        "faces_count": faces_count,
-    }
+    json_output = json.dumps({"faces_count": faces_count})
 
-    logging.info(json.dumps(output))
+    logging.info(json_output)
 
     if args.redis_key is not None:
         r = initialize_redis()
-        r.setex(args.redis_key, 12 * 60 * 60, json.dumps(output))  # 12h expiration
+        r.setex(args.redis_key, 12 * 60 * 60, json_output)  # 12h expiration
 
 
 if __name__ == "__main__":
