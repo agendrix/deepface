@@ -78,13 +78,11 @@ def detect(
         faces_count = len(embeddings)
 
         raw_output = {"faces_count": faces_count}
-        json_output = json.dumps({"faces_count": faces_count})
-
-        logging.info(json_output)
+        logging.info(json.dumps(raw_output | {"redis_key": redis_key}))
 
         if redis_key is not None:
             r = initialize_redis()
-            r.setex(redis_key, 12 * 60 * 60, json_output)  # 12h expiration
+            r.setex(redis_key, 12 * 60 * 60, json.dumps({"faces_count": faces_count}))  # 12h expiration
 
         return raw_output
 
@@ -127,13 +125,11 @@ def verify(
             "distance": result["distance"],
             "faces_count": faces_count,
         }
-        json_output = json.dumps(raw_output)
-
-        logging.info(json_output)
+        logging.info(json.dumps(raw_output | {"redis_key": redis_key}))
 
         if redis_key is not None:
             r = initialize_redis()
-            r.setex(redis_key, 12 * 60 * 60, json_output)  # 12h expiration
+            r.setex(redis_key, 12 * 60 * 60, json.dumps(raw_output))  # 12h expiration
 
         return raw_output
 
