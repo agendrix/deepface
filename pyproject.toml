@@ -1,6 +1,6 @@
 [project]
 name = "deepface-agendrix"
-version = "0.1.6"
+version = "0.1.5"
 description = "Face recognition library for Python, customized for Agendrix usage"
 authors = [
     {name = "Philippe Poulin", email = "p.poulin@agendrix.com"},
