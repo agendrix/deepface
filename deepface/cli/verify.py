@@ -39,7 +39,9 @@ def main():
     img1, _ = load_image(args.img1_path)
     img2, _ = load_image(args.img2_path)
 
+    logging.debug("Calculating embeddings for the first image...")
     embeddings_1 = get_faces_embeddings(img1, args.model, args.detector_backend)
+    logging.debug("Calculating embeddings for the second image...")
     embeddings_2 = get_faces_embeddings(img2, args.model, args.detector_backend)
     faces_count = len(embeddings_2)
 

@@ -1,13 +1,14 @@
 # built-in dependencies
-from typing import Any, Dict, List, Union, Optional
+import logging
+from typing import Any, Dict, List, Optional, Union
 
 # 3rd party dependencies
 import numpy as np
 
 # project dependencies
 from deepface.commons import image_utils
-from deepface.modules import modeling, detection, preprocessing
 from deepface.models.FacialRecognition import FacialRecognition
+from deepface.modules import detection, modeling, preprocessing
 
 
 def represent(
@@ -65,9 +66,7 @@ def represent(
     """
     resp_objs = []
 
-    model: FacialRecognition = modeling.build_model(
-        task="facial_recognition", model_name=model_name
-    )
+    model: FacialRecognition = modeling.build_model(task="facial_recognition", model_name=model_name)
 
     # ---------------------------------
     # we have run pre-process in verification. so, this can be skipped if it is coming from verify.
@@ -141,4 +140,24 @@ def represent(
             }
         )
 
+    # Fetch logger and print images if level is "debug"
+    if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
+        debug_images(img_path, img_objs)
+
     return resp_objs
+
+
+def debug_images(img_path: Union[str, np.ndarray], img_objs: list[dict[str, Any]]) -> None:
+    # Show images for all detected faces using pyplot
+    import matplotlib.pyplot as plt
+
+    # Show full image:
+    img, _ = image_utils.load_image(img_path)
+    plt.imshow(img)
+    plt.show()
+
+    for img_obj in img_objs:
+        print("Facial Area:", img_obj["facial_area"])
+        print("Face Confidence:", img_obj["confidence"])
+        plt.imshow(img_obj["face"])
+        plt.show()
