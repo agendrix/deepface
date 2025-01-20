@@ -1,15 +1,17 @@
 # built-in dependencies
 import os
 from typing import Optional
-import zipfile
-import bz2
-
-# 3rd party dependencies
-import gdown
 
 # project dependencies
 from deepface.commons import folder_utils, package_utils
 from deepface.commons.logger import Logger
+
+# import zipfile
+# import bz2
+
+# # 3rd party dependencies
+# import gdown
+
 
 tf_version = package_utils.get_tf_major_version()
 if tf_version == 1:
@@ -22,9 +24,7 @@ logger = Logger()
 ALLOWED_COMPRESS_TYPES = ["zip", "bz2"]
 
 
-def download_weights_if_necessary(
-    file_name: str, source_url: str, compress_type: Optional[str] = None
-) -> str:
+def download_weights_if_necessary(file_name: str, source_url: str, compress_type: Optional[str] = None) -> str:
     """
     Download the weights of a pre-trained model from external source if not downloaded yet.
     Args:
@@ -42,36 +42,40 @@ def download_weights_if_necessary(
         logger.debug(f"{file_name} is already available at {target_file}")
         return target_file
 
-    if compress_type is not None and compress_type not in ALLOWED_COMPRESS_TYPES:
-        raise ValueError(f"unimplemented compress type - {compress_type}")
+    raise ValueError(
+        f"Automatically downloading weights is unsafe. Please download the weights manually and place them in your ~/.deepface/weights folder. Source URL: {source_url}"
+    )
 
-    try:
-        logger.info(f"🔗 {file_name} will be downloaded from {source_url} to {target_file}...")
+    # if compress_type is not None and compress_type not in ALLOWED_COMPRESS_TYPES:
+    #     raise ValueError(f"unimplemented compress type - {compress_type}")
 
-        if compress_type is None:
-            gdown.download(source_url, target_file, quiet=False)
-        elif compress_type is not None and compress_type in ALLOWED_COMPRESS_TYPES:
-            gdown.download(source_url, f"{target_file}.{compress_type}", quiet=False)
+    # try:
+    #     logger.info(f"🔗 {file_name} will be downloaded from {source_url} to {target_file}...")
 
-    except Exception as err:
-        raise ValueError(
-            f"⛓️‍💥 An exception occurred while downloading {file_name} from {source_url}. "
-            f"Consider downloading it manually to {target_file}."
-        ) from err
+    #     if compress_type is None:
+    #         gdown.download(source_url, target_file, quiet=False)
+    #     elif compress_type is not None and compress_type in ALLOWED_COMPRESS_TYPES:
+    #         gdown.download(source_url, f"{target_file}.{compress_type}", quiet=False)
 
-    # uncompress downloaded file
-    if compress_type == "zip":
-        with zipfile.ZipFile(f"{target_file}.zip", "r") as zip_ref:
-            zip_ref.extractall(os.path.join(home, ".deepface/weights"))
-            logger.info(f"{target_file}.zip unzipped")
-    elif compress_type == "bz2":
-        bz2file = bz2.BZ2File(f"{target_file}.bz2")
-        data = bz2file.read()
-        with open(target_file, "wb") as f:
-            f.write(data)
-        logger.info(f"{target_file}.bz2 unzipped")
+    # except Exception as err:
+    #     raise ValueError(
+    #         f"⛓️‍💥 An exception occurred while downloading {file_name} from {source_url}. "
+    #         f"Consider downloading it manually to {target_file}."
+    #     ) from err
 
-    return target_file
+    # # uncompress downloaded file
+    # if compress_type == "zip":
+    #     with zipfile.ZipFile(f"{target_file}.zip", "r") as zip_ref:
+    #         zip_ref.extractall(os.path.join(home, ".deepface/weights"))
+    #         logger.info(f"{target_file}.zip unzipped")
+    # elif compress_type == "bz2":
+    #     bz2file = bz2.BZ2File(f"{target_file}.bz2")
+    #     data = bz2file.read()
+    #     with open(target_file, "wb") as f:
+    #         f.write(data)
+    #     logger.info(f"{target_file}.bz2 unzipped")
+
+    # return target_file
 
 
 def load_model_weights(model: Sequential, weight_file: str) -> Sequential:
